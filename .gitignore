@@ -42,3 +42,5 @@ nosetests.xml
 *.pdf
 *.out
 *.aux
+.idea*
+:*
