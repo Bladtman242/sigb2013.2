@@ -1,5 +1,7 @@
-from scipy import ndimage
 import cv2
+cv2.namedWindow("Krustjov")
+cv2.destroyAllWindows()
+from scipy import ndimage
 import numpy as np
 from pylab import *
 from matplotlib import *
