@@ -7,6 +7,7 @@ from matplotlib.pyplot import *
 from scipy import *
 import math
 import SIGBTools
+
 def frameTrackingData2BoxData(data):
     #Convert a row of points into tuple of points for each rectangle
     pts= [ (int(data[i]),int(data[i+1])) for i in range(0,11,2) ]
@@ -19,8 +20,8 @@ def frameTrackingData2BoxData(data):
 
 def simpleTextureMap():
 
-    I1 = cv2.imread('Images/ITULogo.jpg')
-    I2 = cv2.imread('Images/ITUMap.bmp')
+    I1 = cv2.imread('data/Images/ITULogo.jpg')
+    I2 = cv2.imread('data/Images/ITUMap.bmp')
 
     #Print Help
     H,Points  = SIGBTools.getHomographyFromMouse(I1,I2,4)
@@ -33,7 +34,7 @@ def simpleTextureMap():
 
 def showImageandPlot(N):
     #A simple attenmpt to get mouse inputs and display images using matplotlib
-    I = cv2.imread('groundfloor.bmp')
+    I = cv2.imread('data/groundfloor.bmp')
     drawI = I.copy()
     #make figure and two subplots
     fig = figure(1) 
@@ -56,17 +57,17 @@ def showImageandPlot(N):
     ax2.imshow(drawI)
     draw() #update display: updates are usually defered 
     show()
-    savefig('somefig.jpg')
-    cv2.imwrite("drawImage.jpg", drawI)
+    savefig('data/somefig.jpg')
+    cv2.imwrite("data/drawImage.jpg", drawI)
 
 
 def texturemapGridSequence():
     """ Skeleton for texturemapping on a video sequence"""
-    fn = 'GridVideos/grid1.mp4'
+    fn = 'data/GridVideos/grid1.mp4'
     cap = cv2.VideoCapture(fn)
     drawContours = True;
 
-    texture = cv2.imread('Images/ITULogo.jpg')
+    texture = cv2.imread('data/Images/ITULogo.jpg')
     texture = cv2.pyrDown(texture)
 
 
@@ -107,12 +108,12 @@ def realisticTexturemap(scale,point,map):
 
 def showFloorTrackingData():
     #Load videodata
-    fn = "GroundFloorData/sunclipds.avi"
+    fn = "data/GroundFloorData/sunclipds.avi"
     cap = cv2.VideoCapture(fn)
     
     #load Tracking data
     running, imgOrig = cap.read()
-    dataFile = np.loadtxt('GroundFloorData/trackingdata.dat')
+    dataFile = np.loadtxt('data/GroundFloorData/trackingdata.dat')
     m,n = dataFile.shape
     
     fig = figure()
@@ -167,11 +168,11 @@ def DetectPlaneObject(I,minSize=1000):
   
 def texturemapObjectSequence():
     """ Poor implementation of simple texturemap """
-    fn = 'BookVideos/Seq3_scene.mp4'
+    fn = 'data/BookVideos/Seq3_scene.mp4'
     cap = cv2.VideoCapture(fn) 
     drawContours = True;
     
-    texture = cv2.imread('images/ITULogo.jpg')
+    texture = cv2.imread('data/images/ITULogo.jpg')
     #texture = cv2.transpose(texture)
     mTex,nTex,t = texture.shape
     
