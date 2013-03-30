@@ -103,6 +103,9 @@ def texturemapGridSequence():
 
     mTex,nTex,t = texture.shape
 
+    # Use the corners of the texture
+    srcPoints = [(float(0.0),float(0.0)),(float(nTex),0),(float(nTex),float(mTex)),(0,mTex)]
+    
     #load Tracking data
     running, imgOrig = cap.read()
     mI,nI,t = imgOrig.shape
@@ -118,18 +121,29 @@ def texturemapGridSequence():
         if(running):
             imgOrig = cv2.pyrDown(imgOrig)
             gray = cv2.cvtColor(imgOrig,cv2.COLOR_BGR2GRAY)
+
+            m,n = gray.shape
+
             found, corners = cv2.findChessboardCorners(gray, pattern_size)
             if found:
                 term = ( cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_COUNT, 30, 0.1 )
-                cv2.cornerSubPix(gray, corners, (5, 5), (-1, -1), term)
-                cv2.drawChessboardCorners(imgOrig, pattern_size, corners, found)
-
+              #  cv2.cornerSubPix(gray, corners, (5, 5), (-1, -1), term)
+              #  cv2.drawChessboardCorners(imgOrig, pattern_size, corners, found)
+                # Get the points based on the chessboard
+                dstPoints = []
                 for t in idx:
-                    cv2.circle(imgOrig,(int(corners[t,0,0]),int(corners[t,0,1])),10,(255,t,t))
-            cv2.imshow("win2",imgOrig)
+                    dstPoints.append((int(corners[t,0,0]),int(corners[t,0,1])))
+                    #cv2.circle(imgOrig,(int(corners[t,0,0]),int(corners[t,0,1])),10,(255,t,t))
+                H = SIGBTools.estimateHomography(srcPoints,dstPoints)
+                
+                overlay = cv2.warpPerspective(texture, H,(n, m))
+                
+                M = cv2.addWeighted(imgOrig, 0.5, overlay, 0.5,0)
+                
+                cv2.imshow("win2",M)
+            else:
+                cv2.imshow("win2",imgOrig)
             cv2.waitKey(1)
-
-
 
 def realisticTexturemap(scale,point,map):
     #H = np.load('H_G_M')
@@ -234,8 +248,8 @@ def texturemapObjectSequence():
             cv2.circle(imgOrig,(100,100),10,(255,0,0))
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
-showFloorTrackingData()
+#showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
-#texturemapGridSequence()
-texturemapGroundFloor()
+texturemapGridSequence()
+#texturemapGroundFloor()
