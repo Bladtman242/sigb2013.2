@@ -28,7 +28,7 @@ def simpleTextureMap():
 
     #Print Help
     H,Points  = SIGBTools.getHomographyFromMouse(I1,I2,4)
-    h, w,d = I2.shape
+    h,w,d = I2.shape
     overlay = cv2.warpPerspective(I1, H,(w, h))
     M = cv2.addWeighted(I2, 0.5, overlay, 0.5,0)
 
@@ -64,6 +64,34 @@ def showImageandPlot(N):
     cv2.imwrite("data/drawImage.jpg", drawI)
 
 
+def texturemapGroundFloor():
+    """
+    Place the texture on every frame of the clip
+    """
+    fn = 'data/GroundFloorData/SunClipDS.avi'
+    cap = cv2.VideoCapture(fn)
+
+    texture = cv2.imread('data/Images/ITULogo.jpg')
+    texture = cv2.pyrDown(texture)
+    
+    mTex,nTex,t = texture.shape
+    
+    running, imgOrig = cap.read()
+    mI,nI,t = imgOrig.shape
+
+    H,Points  = SIGBTools.getHomographyFromMouse(texture,imgOrig,-1)
+    h,w,d = imgOrig.shape
+    
+    while(running):
+        running, imgOrig = cap.read()
+        if(running):
+            h,w,d = imgOrig.shape
+            overlay = cv2.warpPerspective(texture, H,(w, h))
+            M = cv2.addWeighted(imgOrig, 0.5, overlay, 0.5,0)
+            cv2.imshow("Overlayed",M)
+            cv2.waitKey(1)
+    
+
 def texturemapGridSequence():
     """ Skeleton for texturemapping on a video sequence"""
     fn = 'data/GridVideos/grid1.mp4'
@@ -73,9 +101,11 @@ def texturemapGridSequence():
     texture = cv2.imread('data/Images/ITULogo.jpg')
     texture = cv2.pyrDown(texture)
 
-
     mTex,nTex,t = texture.shape
 
+    # Use the corners of the texture
+    srcPoints = [(float(0.0),float(0.0)),(float(nTex),0),(float(nTex),float(mTex)),(0,mTex)]
+    
     #load Tracking data
     running, imgOrig = cap.read()
     mI,nI,t = imgOrig.shape
@@ -91,18 +121,29 @@ def texturemapGridSequence():
         if(running):
             imgOrig = cv2.pyrDown(imgOrig)
             gray = cv2.cvtColor(imgOrig,cv2.COLOR_BGR2GRAY)
+
+            m,n = gray.shape
+
             found, corners = cv2.findChessboardCorners(gray, pattern_size)
             if found:
                 term = ( cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_COUNT, 30, 0.1 )
-                cv2.cornerSubPix(gray, corners, (5, 5), (-1, -1), term)
-                cv2.drawChessboardCorners(imgOrig, pattern_size, corners, found)
-
+              #  cv2.cornerSubPix(gray, corners, (5, 5), (-1, -1), term)
+              #  cv2.drawChessboardCorners(imgOrig, pattern_size, corners, found)
+                # Get the points based on the chessboard
+                dstPoints = []
                 for t in idx:
-                    cv2.circle(imgOrig,(int(corners[t,0,0]),int(corners[t,0,1])),10,(255,t,t))
-            cv2.imshow("win2",imgOrig)
+                    dstPoints.append((int(corners[t,0,0]),int(corners[t,0,1])))
+                    #cv2.circle(imgOrig,(int(corners[t,0,0]),int(corners[t,0,1])),10,(255,t,t))
+                H = SIGBTools.estimateHomography(srcPoints,dstPoints)
+                
+                overlay = cv2.warpPerspective(texture, H,(n, m))
+                
+                M = cv2.addWeighted(imgOrig, 0.5, overlay, 0.5,0)
+                
+                cv2.imshow("win2",M)
+            else:
+                cv2.imshow("win2",imgOrig)
             cv2.waitKey(1)
-
-
 
 def realisticTexturemap(scale,point,map):
     #H = np.load('H_G_M')
@@ -215,7 +256,8 @@ def texturemapObjectSequence():
             cv2.waitKey(1)
 
 showFloorTrackingData()
+#showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
-#texturemapGridSequence()
-# vim: ts=4:shiftwidth=4:expandtab
+texturemapGridSequence()
+#texturemapGroundFloor()

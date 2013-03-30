@@ -42,6 +42,7 @@ nosetests.xml
 *.pdf
 *.out
 *.aux
+*.swp
 .idea/
 :/
 data/
