@@ -11,6 +11,13 @@ import math
 import SIGBTools
 import time
 
+def make_homogen(point):
+    return vstack((point, ones((1, point.shape[1]))))
+
+def normalize(point):
+    point /= point[-1]
+    return point
+
 def frameTrackingData2BoxData(data):
     #Convert a row of points into tuple of points for each rectangle
     pts= [ (int(data[i]),int(data[i+1])) for i in range(0,11,2) ]
@@ -150,8 +157,16 @@ def realisticTexturemap(scale,point,map):
     print "Not implemented yet\n"*30
 
 
-def displayTrace(homo, map):
-    pass
+def displayTrace(homo, pnts, space):
+    a = [pnts[0][0],pnts[0][1],1]
+    b = [pnts[1][0],pnts[1][1],1]
+    a,b = homo.dot(a), homo.dot( b)
+    a,b = normalize(a), normalize(b)
+
+    #cv2.circle(space, (int(a[0]),int(a[1])),2,(0,0,0))
+    #cv2.circle(space, (int(b[0]),int(b[1])),2,(0,0,0))
+    cv2.circle(space, (int(b[0]),int(b[1]-((b[1]-a[1])/2))),2,(0,0,0))
+    cv2.imshow("aux", space)
 
 def showFloorTrackingData():
     #Load videodata
@@ -160,6 +175,7 @@ def showFloorTrackingData():
     cap = cv2.VideoCapture(fn)
     running, imgOrig = cap.read()
     homo, pts = SIGBTools.getHomographyFromMouse(imgOrig, I2)
+    np.save("Homography", homo)
     
     #load Tracking data
     running, imgOrig = cap.read()
@@ -176,8 +192,9 @@ def showFloorTrackingData():
                 aBox = boxes[k]
                 cv2.rectangle(imgOrig, aBox[0], aBox[1], boxColors[k])
             cv2.imshow("boxes",imgOrig);
+            displayTrace(homo, [boxes[1][0], boxes[1][1]], I2)
             #time.sleep(0.001)
-            l=cv2.waitKey(1)
+            l=cv2.waitKey(10)
 
 def angle_cos(p0, p1, p2):
     d1, d2 = p0-p1, p2-p1
@@ -256,8 +273,8 @@ def texturemapObjectSequence():
             cv2.waitKey(1)
 
 showFloorTrackingData()
-#showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
-texturemapGridSequence()
+#texturemapGridSequence()
 #texturemapGroundFloor()
+# vim: ts=4:shiftwidth=4:expandtab
