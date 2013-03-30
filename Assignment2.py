@@ -1,5 +1,7 @@
-from scipy import ndimage
 import cv2
+cv2.namedWindow("Krustjov")
+cv2.destroyAllWindows()
+from scipy import ndimage
 import numpy as np
 from pylab import *
 from matplotlib import *
@@ -7,6 +9,7 @@ from matplotlib.pyplot import *
 from scipy import *
 import math
 import SIGBTools
+import time
 
 def frameTrackingData2BoxData(data):
     #Convert a row of points into tuple of points for each rectangle
@@ -135,12 +138,12 @@ def realisticTexturemap(scale,point,map):
 
 def showFloorTrackingData():
     #Load videodata
-    fn = "data/GroundFloorData/sunclipds.avi"
+    fn = "data/GroundFloorData/SunClipDS.avi"
     cap = cv2.VideoCapture(fn)
     
     #load Tracking data
     running, imgOrig = cap.read()
-    dataFile = np.loadtxt('data/GroundFloorData/trackingdata.dat')
+    dataFile = np.loadtxt("data/GroundFloorData/trackingdata.dat")
     m,n = dataFile.shape
     
     fig = figure()
@@ -153,7 +156,8 @@ def showFloorTrackingData():
                 aBox = boxes[k]
                 cv2.rectangle(imgOrig, aBox[0], aBox[1], boxColors[k])
             cv2.imshow("boxes",imgOrig);
-            cv2.waitKey(1)
+            #time.sleep(0.001)
+            l=cv2.waitKey(1)
 
 def angle_cos(p0, p1, p2):
     d1, d2 = p0-p1, p2-p1
@@ -230,7 +234,7 @@ def texturemapObjectSequence():
             cv2.circle(imgOrig,(100,100),10,(255,0,0))
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
-#showFloorTrackingData()
+showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
 #texturemapGridSequence()
