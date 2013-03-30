@@ -25,7 +25,7 @@ def simpleTextureMap():
 
     #Print Help
     H,Points  = SIGBTools.getHomographyFromMouse(I1,I2,4)
-    h, w,d = I2.shape
+    h,w,d = I2.shape
     overlay = cv2.warpPerspective(I1, H,(w, h))
     M = cv2.addWeighted(I2, 0.5, overlay, 0.5,0)
 
@@ -61,6 +61,34 @@ def showImageandPlot(N):
     cv2.imwrite("data/drawImage.jpg", drawI)
 
 
+def texturemapGroundFloor():
+    """
+    Place the texture on every frame of the clip
+    """
+    fn = 'data/GroundFloorData/SunClipDS.avi'
+    cap = cv2.VideoCapture(fn)
+
+    texture = cv2.imread('data/Images/ITULogo.jpg')
+    texture = cv2.pyrDown(texture)
+    
+    mTex,nTex,t = texture.shape
+    
+    running, imgOrig = cap.read()
+    mI,nI,t = imgOrig.shape
+
+    H,Points  = SIGBTools.getHomographyFromMouse(texture,imgOrig,-1)
+    h,w,d = imgOrig.shape
+    
+    while(running):
+        running, imgOrig = cap.read()
+        if(running):
+            h,w,d = imgOrig.shape
+            overlay = cv2.warpPerspective(texture, H,(w, h))
+            M = cv2.addWeighted(imgOrig, 0.5, overlay, 0.5,0)
+            cv2.imshow("Overlayed",M)
+            cv2.waitKey(1)
+    
+
 def texturemapGridSequence():
     """ Skeleton for texturemapping on a video sequence"""
     fn = 'data/GridVideos/grid1.mp4'
@@ -69,7 +97,6 @@ def texturemapGridSequence():
 
     texture = cv2.imread('data/Images/ITULogo.jpg')
     texture = cv2.pyrDown(texture)
-
 
     mTex,nTex,t = texture.shape
 
@@ -206,4 +233,5 @@ def texturemapObjectSequence():
 #showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
-texturemapGridSequence()
+#texturemapGridSequence()
+texturemapGroundFloor()
