@@ -174,8 +174,9 @@ def showFloorTrackingData():
     I2 = cv2.imread('data/Images/ITUMap.bmp')
     cap = cv2.VideoCapture(fn)
     running, imgOrig = cap.read()
-    homo, pts = SIGBTools.getHomographyFromMouse(imgOrig, I2)
-    np.save("Homography", homo)
+    #homo, pts = SIGBTools.getHomographyFromMouse(imgOrig, I2)
+    homo = np.load("Homography.good.npy")
+    #np.save("Homography", homo)
     
     #load Tracking data
     running, imgOrig = cap.read()
