@@ -33,7 +33,7 @@ def simpleTextureMap():
     M = cv2.addWeighted(I2, 0.5, overlay, 0.5,0)
 
     cv2.imshow("Overlayed Image",M)
-    cv2.waitKey(0)
+    cv2.waitKey(1)
 
 def showImageandPlot(N):
     #A simple attenmpt to get mouse inputs and display images using matplotlib
@@ -109,10 +109,16 @@ def realisticTexturemap(scale,point,map):
     print "Not implemented yet\n"*30
 
 
+def displayTrace(homo, map):
+    pass
+
 def showFloorTrackingData():
     #Load videodata
     fn = "data/GroundFloorData/SunClipDS.avi"
+    I2 = cv2.imread('data/Images/ITUMap.bmp')
     cap = cv2.VideoCapture(fn)
+    running, imgOrig = cap.read()
+    homo, pts = SIGBTools.getHomographyFromMouse(imgOrig, I2)
     
     #load Tracking data
     running, imgOrig = cap.read()
@@ -207,6 +213,7 @@ def texturemapObjectSequence():
             cv2.circle(imgOrig,(100,100),10,(255,0,0))
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
+
 showFloorTrackingData()
 #simpleTextureMap()
 #realisticTexturemap(0,0,0)
