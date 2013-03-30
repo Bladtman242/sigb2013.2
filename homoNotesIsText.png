@@ -8,3 +8,5 @@
 
 1.12 Benefit: linearity. (a change dx,dy on the map is equally large no matter where it starts)
 fails: should fail on the stairway (though it is actually pretty close)
+
+2.23 (og 25) Given that T and M are actually the same "plane", Ht->g = Hm->g = (Hg->m)^-1 and then some scaling.

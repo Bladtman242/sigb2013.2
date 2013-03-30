@@ -11,6 +11,8 @@ import math
 import SIGBTools
 import time
 
+rcParams['figure.figsize'] = 30,10
+
 def make_homogen(point):
     return vstack((point, ones((1, point.shape[1]))))
 
@@ -152,10 +154,36 @@ def texturemapGridSequence():
                 cv2.imshow("win2",imgOrig)
             cv2.waitKey(1)
 
-def realisticTexturemap(scale,point,map):
-    #H = np.load('H_G_M')
-    print "Not implemented yet\n"*30
+def realisticTexturemap(scale=1,point=(200,200)):
+    homo = linalg.inv((np.load("Homography.good.npy")))  #pun intended
+    
+    #A simple attenmpt to get mouse inputs and display images using matplotlib
+    I = cv2.imread('data/Images/ITULogo.jpg')
+    mp = cv2.imread('data/Images/Ground.jpg')
+    #make figure and two subplots
+    fig = figure(1) 
+    ax1  = subplot(1,2,1) 
+    ax2  = subplot(1,2,2) 
+    ax1.imshow(mp) 
+    ax2.imshow(I)
+    ax1.axis('image') 
+    ax1.axis('off') 
+    points = fig.ginput(1) 
+    fig.hold('on')
+    n,m,o = shape(mp)
+    warp = cv2.warpPerspective(I, homo, (m,n))
+    print shape(warp)
+    for i in range(m):
+        for j in range(n):
+            if (warp[j,i] != [0,0,0]).all() :
+               mp[j,i] = warp[j,i] 
 
+    ax1.imshow(mp)
+    ax2.imshow(warp)
+    draw() #update display: updates are usually defered 
+    show()
+    #savefig('data/somefig.jpg')
+    #cv2.imwrite("drawImage.jpg", I)
 
 def displayTrace(homo, pnts, space):
     a = [pnts[0][0],pnts[0][1],1]
@@ -273,9 +301,9 @@ def texturemapObjectSequence():
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
 
-showFloorTrackingData()
+#showFloorTrackingData()
 #simpleTextureMap()
-#realisticTexturemap(0,0,0)
+realisticTexturemap()
 #texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
