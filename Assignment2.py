@@ -113,7 +113,11 @@ def texturemapGridSequence():
     mTex,nTex,t = texture.shape
 
     # Use the corners of the texture
-    srcPoints = [(float(0.0),float(0.0)),(float(nTex),0),(float(nTex),float(mTex)),(0,mTex)]
+    srcPoints = [
+            (float(0.0),float(0.0)),
+            (float(nTex),0),
+            (float(nTex),float(mTex)),
+            (0,mTex)]
     
     #load Tracking data
     running, imgOrig = cap.read()
@@ -123,7 +127,7 @@ def texturemapGridSequence():
 
     pattern_size = (9, 6)
 
-    idx = [0,8,45,53]
+    idx = [0,8,53,45]
     while(running):
     #load Tracking data
         running, imgOrig = cap.read()
@@ -143,11 +147,12 @@ def texturemapGridSequence():
                 for t in idx:
                     dstPoints.append((int(corners[t,0,0]),int(corners[t,0,1])))
                     #cv2.circle(imgOrig,(int(corners[t,0,0]),int(corners[t,0,1])),10,(255,t,t))
+                
                 H = SIGBTools.estimateHomography(srcPoints,dstPoints)
                 
                 overlay = cv2.warpPerspective(texture, H,(n, m))
                 
-                M = cv2.addWeighted(imgOrig, 0.5, overlay, 0.5,0)
+                M = cv2.addWeighted(imgOrig, 0.9, overlay, 0.9,0)
                 
                 cv2.imshow("win2",M)
             else:
@@ -277,7 +282,6 @@ def texturemapObjectSequence():
     running, imgOrig = cap.read()
     mI,nI,t = imgOrig.shape
     
-    print running 
     while(running):
         for t in range(20):
             running, imgOrig = cap.read() 
@@ -303,7 +307,7 @@ def texturemapObjectSequence():
 
 #showFloorTrackingData()
 #simpleTextureMap()
-realisticTexturemap()
-#texturemapGridSequence()
+#realisticTexturemap()
+texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
