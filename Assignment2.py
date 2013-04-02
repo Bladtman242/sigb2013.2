@@ -165,6 +165,10 @@ def realisticTexturemap(scale=1,point=(200,200)):
     #A simple attenmpt to get mouse inputs and display images using matplotlib
     I = cv2.imread('data/Images/ITULogo.jpg')
     mp = cv2.imread('data/Images/Ground.jpg')
+
+    I = copy(cv2.cvtColor(I,cv2.COLOR_BGR2RGB))
+    mp = copy(cv2.cvtColor(mp,cv2.COLOR_BGR2RGB))
+
     #make figure and two subplots
     fig = figure(1) 
     ax1  = subplot(1,2,1) 
