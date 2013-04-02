@@ -173,16 +173,27 @@ def realisticTexturemap(scale=1,point=(200,200)):
     ax2.imshow(I)
     ax1.axis('image') 
     ax1.axis('off') 
-    points = fig.ginput(1) 
+    point = fig.ginput(1)
     fig.hold('on')
     n,m,o = shape(mp)
-    warp = cv2.warpPerspective(I, homo, (m,n))
-    print shape(warp)
-    for i in range(m):
-        for j in range(n):
-            if (warp[j,i] != [0,0,0]).all() :
-               mp[j,i] = warp[j,i] 
+    t=[homo[0,2],homo[1,2],1]
+    print homo
+    print t
 
+    point = point[0]
+    point = [point[0],point[1],1]
+    print point
+    point = np.subtract(point,t)
+
+    point = np.matrix(homo).I * point.T #maybe this should be normalised
+    point = normalize(point)
+    newHomo = np.identity(3)
+    newHomo[0][2]=point[0]
+    newHomo[1][2] = point[1]
+    #homo = newHomo * homo
+    warp = cv2.warpPerspective(I, homo, (m,n))
+
+    mp = cv2.addWeighted(mp, 0.9, warp, 0.9, 0)
     ax1.imshow(mp)
     ax2.imshow(warp)
     draw() #update display: updates are usually defered 
@@ -307,7 +318,7 @@ def texturemapObjectSequence():
 
 #showFloorTrackingData()
 #simpleTextureMap()
-#realisticTexturemap()
-texturemapGridSequence()
+realisticTexturemap()
+# texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
