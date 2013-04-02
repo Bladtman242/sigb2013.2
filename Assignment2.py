@@ -176,24 +176,24 @@ def realisticTexturemap(scale=1,point=(200,200)):
     point = fig.ginput(1)
     fig.hold('on')
     n,m,o = shape(mp)
-    t=[homo[0,2],homo[1,2],1]
-    print homo
-    print t
+    t=[homo[0,2],homo[1,2],homo[2,2]]
 
     point = point[0]
     point = [point[0],point[1],1]
-    print point
-    point = np.subtract(point,t)
+    t = np.subtract(t,point)
 
-    point = np.matrix(homo).I * point.T #maybe this should be normalised
-    point = normalize(point)
+    pointT = np.linalg.inv(homo).dot(t.T)
+    pointT = normalize(pointT)
     newHomo = np.identity(3)
     newHomo[0][2]=point[0]
     newHomo[1][2] = point[1]
-    #homo = newHomo * homo
+    homo = newHomo * homo
     warp = cv2.warpPerspective(I, homo, (m,n))
 
     mp = cv2.addWeighted(mp, 0.9, warp, 0.9, 0)
+    t=np.add(t,point)
+    t = normalize(t)
+    cv2.circle(mp,(int(t[0]),int(t[1])), 2, (0,0,0)) 
     ax1.imshow(mp)
     ax2.imshow(warp)
     draw() #update display: updates are usually defered 
@@ -319,6 +319,6 @@ def texturemapObjectSequence():
 #showFloorTrackingData()
 #simpleTextureMap()
 realisticTexturemap()
-# texturemapGridSequence()
+#texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
