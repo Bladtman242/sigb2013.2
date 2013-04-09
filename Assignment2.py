@@ -160,40 +160,101 @@ def texturemapGridSequence():
             cv2.waitKey(1)
 
 def realisticTexturemap(scale=1,point=(200,200)):
-    homo = linalg.inv((np.load("Homography.good.npy")))  #pun intended
+    homo = np.load("Homography.good.npy")
     
     #A simple attenmpt to get mouse inputs and display images using matplotlib
-    I = cv2.imread('data/Images/ITULogo.jpg')
+    T = cv2.imread('data/Images/ITULogo.jpg')
     mp = cv2.imread('data/Images/Ground.jpg')
+    M = cv2.imread('data/Images/ITUMap.bmp')
+
+    T = copy(cv2.cvtColor(T,cv2.COLOR_BGR2RGB))
+    mp = copy(cv2.cvtColor(mp,cv2.COLOR_BGR2RGB))
+
     #make figure and two subplots
     fig = figure(1) 
     ax1  = subplot(1,2,1) 
     ax2  = subplot(1,2,2) 
+    ax3  = subplot(1,2,2) 
     ax1.imshow(mp) 
-    ax2.imshow(I)
+    ax2.imshow(T)
     ax1.axis('image') 
     ax1.axis('off') 
     point = fig.ginput(1)
     fig.hold('on')
+    
     n,m,o = shape(mp)
-    t=[homo[0,2],homo[1,2],1]
-    print homo
-    print t
+    n1,m1,o1 = shape(T) 
 
-    point = point[0]
-    point = [point[0],point[1],1]
-    print point
-    point = np.subtract(point,t)
+    point = np.matrix([point[0][0],point[0][1],1]).T
 
-    point = np.matrix(homo).I * point.T #maybe this should be normalised
-    point = normalize(point)
-    newHomo = np.identity(3)
-    newHomo[0][2]=point[0]
-    newHomo[1][2] = point[1]
-    #homo = newHomo * homo
-    warp = cv2.warpPerspective(I, homo, (m,n))
+    pointPrime = homo * point
+
+    aspect = m1 /n1
+    
+    pointPrime = normalize(pointPrime)
+    
+    delta = 3
+    x = pointPrime[0][0]
+    y = pointPrime[1][0]
+    
+    newPoints = [
+                [x,y],   
+                [x,y+(delta*aspect)],   
+                [x+delta,y+(delta*aspect)],   
+                [x+delta,y]   
+            ]
+
+    TPoints = [
+                [0,0],
+                [0,n1],
+                [m1,n1],
+                [m1,0]
+            ]
+   
+    TCenterX = TPoints[0][0] + TPoints[3][0] / 2
+    TCenterY = TPoints[0][1] + TPoints[1][1] / 2
+
+    TCenter = (TCenterX,TCenterY)
+
+    H_MT = SIGBTools.estimateHomography(newPoints, TPoints)
+    
+    H_TG = homo.dot(H_MT).I
+    
+    phtg = normalize(H_TG.dot(np.matrix([0,0,1]).T))
+    
+    sigurtVector = point - phtg
+
+    sigurtMat = np.matrix([
+            [1.,0.,sigurtVector[0][0]],
+            [0.,1.,sigurtVector[1][0]],
+            [0.,0.,1.]
+            ]);
+ 
+    GCenter = normalize(sigurtMat * H_TG * np.matrix([TCenter[0],TCenter[1],1]).T)
+    
+    vectorToOrigin = [GCenter[0][0]*-1,GCenter[1][0]*-1]
+    
+    sigurtFlyt = np.matrix([
+            [1,0,vectorToOrigin[0]],
+            [0,1,vectorToOrigin[1]],
+            [0,0,1]
+        ]);
+    
+    sigurtScale = np.matrix([
+            [scale,0,0],
+            [0,scale,0],
+            [0,0,1]
+        ]);
+    
+    scaleMat = sigurtFlyt.I * (sigurtScale * sigurtFlyt)
+    
+
+
+    cv2.circle(mp,(GCenter[0],GCenter[1]),10,(255,0,0))
+    warp = cv2.warpPerspective(T, scaleMat.dot(sigurtMat.dot(H_TG)), (m,n))
 
     mp = cv2.addWeighted(mp, 0.9, warp, 0.9, 0)
+     
     ax1.imshow(mp)
     ax2.imshow(warp)
     draw() #update display: updates are usually defered 
@@ -318,7 +379,7 @@ def texturemapObjectSequence():
 
 #showFloorTrackingData()
 #simpleTextureMap()
-realisticTexturemap()
-# texturemapGridSequence()
+realisticTexturemap(20)
+#texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
