@@ -53,10 +53,8 @@ def getCornerCoords(boardImg):
 
 def AugmentImages():
 
-
     I1 = cv2.imread("CalibrationImage1.jpg")
     I1Gray = cv2.cvtColor(I1,cv2.COLOR_RGB2GRAY)
-
     I2 = cv2.imread("CalibrationImage2.jpg")
     I2Gray = cv2.cvtColor(I2,cv2.COLOR_RGB2GRAY)
     I3 = cv2.imread("CalibrationImage3.jpg")
@@ -84,30 +82,26 @@ def AugmentImages():
     box_cam1 = cam1.project(toHomogenious(box))
 
 
-
     # 2D projection of bottom square
     # figure()
     # imshow(I1)
     # plot(box_cam1[0,:],box_cam1[1,:],linewidth=3)
     # show()
 
-
-
     # print shape(box_cam1)
 
-
     # use H to transfer points to the second image
-    box_trans = normalize(dot(H,box_cam1))
+    box_trans = cv2.normalize(dot(H,box_cam1))
+    
     # compute second camera matrix from cam1 and H
     cam2 = Camera(dot(H,cam1.P))
     A = dot(linalg.inv(K),cam2.P[:,:3])
-    cross(A[:,0],A[:,1])
-    print "success made a cross product"
 
+    A = array([A[:,0],A[:,1],np.cross(A[:,0],A[:,1],axis=0)]).T
     
-    A = array([A[:,0],A[:,1],cross(A[:,0],A[:,1])]).T
-    cam2.P[:,:3] = dot(K,A)
-
+    cam2.P[:,:3] = np.dot(K,A[0])
+    print shape(box_trans)
+    print box_trans
     # project with the second camera
     box_cam2 = cam2.project(toHomogenious(box_trans))
 
@@ -127,5 +121,3 @@ AugmentImages()
 # cam2.P[:,:3] = np.dot(K,A)
 # project with the second camera
 # box_cam2 = cam2.project(toHomogenious(box))
-
-
