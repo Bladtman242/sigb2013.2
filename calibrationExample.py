@@ -5,7 +5,7 @@ from SIGBToolsForSecond import Camera
 
 def calibrationExample():
     camNum =0           # The number of the camera to calibrate
-    nPoints = 5         # number of images used for the calibration (space presses)
+    nPoints = 7         # number of images used for the calibration (space presses)
     patternSize=(9,6)   #size of the calibration pattern
     saveImage = True
 
