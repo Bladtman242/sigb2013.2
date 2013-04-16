@@ -64,8 +64,8 @@ def AugmentImages():
     I5 = cv2.imread("CalibrationImage5.jpg")
     I5Gray = cv2.cvtColor(I5,cv2.COLOR_RGB2GRAY)
 
-    I1Corners = getCornerCoords(I1)
-    I2Corners = getCornerCoords(I2)
+    I1Corners = getCornerCoords(I1Gray)
+    I2Corners = getCornerCoords(I2Gray)
 
 
     H = estimateHomography(I1Corners, I2Corners)
@@ -81,6 +81,8 @@ def AugmentImages():
 
     box_cam1 = cam1.project(toHomogenious(box))
 
+    print "box cam1"
+    print box_cam1
 
     # 2D projection of bottom square
     # figure()
@@ -88,26 +90,29 @@ def AugmentImages():
     # plot(box_cam1[0,:],box_cam1[1,:],linewidth=3)
     # show()
 
-    # print shape(box_cam1)
-
     # use H to transfer points to the second image
     box_trans = cv2.normalize(dot(H,box_cam1))
     
-    # compute second camera matrix from cam1 and H
+    # compute second camera matrix from cam1 and H the homography is just multiplied on the matrix
     cam2 = Camera(dot(H,cam1.P))
+
     A = dot(linalg.inv(K),cam2.P[:,:3])
 
     A = array([A[:,0],A[:,1],np.cross(A[:,0],A[:,1],axis=0)]).T
     
     cam2.P[:,:3] = np.dot(K,A[0])
-    print shape(box_trans)
-    print box_trans
+
     # project with the second camera
     box_cam2 = cam2.project(toHomogenious(box_trans))
 
+    print "box cam2"
+    print box_cam2
     figure()
     imshow(I2)
-    plot(box_cam1[0,:],box_cam1[1,:],linewidth=3)
+    # IF YOU LOOK AT THE PRINTOUTS OF BOTH BOX_CAM1 AND BOX_CAM2 THEY'RE BOTH VALID, but only 
+    #box_cam1 is being plotted in the image. I don't get why?
+    #If you change the line underneath here to draw box_cam1 instead of number two, it'll be drawn. -----------------HERE!!!
+    plot(box_cam2[0,:],box_cam2[1,:],linewidth=3)
     show()
 
 AugmentImages()
