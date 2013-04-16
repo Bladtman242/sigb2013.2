@@ -6,8 +6,6 @@ import cv2
 import math
 
 
-global cubeCenterCoord
-
 def cube_points(c,wid):
     """ Creates a list of points for plotting a cube with plot. (the first 5 points are
     the bottom square, some sides repeated). """
@@ -38,7 +36,6 @@ def cube_points(c,wid):
 def getCornerCoords(boardImg):
 
     """
-
     :param boardImg:
     :return: cornercoords and centercoord
     """
@@ -48,7 +45,6 @@ def getCornerCoords(boardImg):
     (x2,y2) = (corners[8][0][0],corners[8][0][1])
     (x3,y3) = (corners[45][0][0],corners[45][0][1])
     (x4,y4) = (corners[53][0][0],corners[53][0][1])
-    cubeCenterCoord = (((x1+x2)/2),((y1+y3)/2),10)
     return [(x1,y1),(x2,y2),(x3,y3),(x4,y4)]
 
 def AugmentImages():
@@ -64,9 +60,8 @@ def AugmentImages():
     I5 = cv2.imread("CalibrationImage5.jpg")
     I5Gray = cv2.cvtColor(I5,cv2.COLOR_RGB2GRAY)
 
-    I1Corners = getCornerCoords(I1Gray)
-    I2Corners = getCornerCoords(I2Gray)
-
+    I1Corners = getCornerCoords(I5Gray)
+    I2Corners = getCornerCoords(I1Gray)
 
     H = estimateHomography(I1Corners, I2Corners)
 
@@ -80,9 +75,6 @@ def AugmentImages():
     cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
 
     box_cam1 = cam1.project(toHomogenious(box))
-
-    print "box cam1"
-    print box_cam1
 
     # 2D projection of bottom square
     # figure()
@@ -103,15 +95,20 @@ def AugmentImages():
     cam2.P[:,:3] = np.dot(K,A[0])
 
     # project with the second camera
-    box_cam2 = cam2.project(toHomogenious(box_trans))
+    box_cam2 = np.array(cam2.project(toHomogenious(box_trans)))
+    print box_cam1
+    print shape(box_cam1)
+    print shape(box_cam1[0,:])
+    print type(box_cam1)
 
-    print "box cam2"
     print box_cam2
+    print shape(box_cam2)
+    print shape(box_cam2[0,:])
+    print type(box_cam2)
     figure()
     imshow(I2)
-    # IF YOU LOOK AT THE PRINTOUTS OF BOTH BOX_CAM1 AND BOX_CAM2 THEY'RE BOTH VALID, but only 
-    #box_cam1 is being plotted in the image. I don't get why?
-    #If you change the line underneath here to draw box_cam1 instead of number two, it'll be drawn. -----------------HERE!!!
+    
+    # Only box_cam1 is being plotted in the image
     plot(box_cam2[0,:],box_cam2[1,:],linewidth=3)
     show()
 
