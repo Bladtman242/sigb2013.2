@@ -45,29 +45,29 @@ def getCornerCoords(boardImg):
     (x2,y2) = (corners[8][0][0],corners[8][0][1])
     (x3,y3) = (corners[45][0][0],corners[45][0][1])
     (x4,y4) = (corners[53][0][0],corners[53][0][1])
-    return [(x1,y1),(x2,y2),(x3,y3),(x4,y4)]
+    return [(x4,y4),(x3,y3),(x1,y1),(x2,y2)]
 
 def AugmentImages():
 
-    I1 = cv2.imread("CalibrationImage1.jpg")
+    I1 = cv2.imread("pattern.png")
     I1Gray = cv2.cvtColor(I1,cv2.COLOR_RGB2GRAY)
-    I2 = cv2.imread("CalibrationImage2.jpg")
+    I2 = cv2.imread("CalibrationImage7.jpg")
     I2Gray = cv2.cvtColor(I2,cv2.COLOR_RGB2GRAY)
-    I3 = cv2.imread("CalibrationImage3.jpg")
-    I3Gray = cv2.cvtColor(I3,cv2.COLOR_RGB2GRAY)
-    I4 = cv2.imread("CalibrationImage4.jpg")
-    I4Gray = cv2.cvtColor(I4,cv2.COLOR_RGB2GRAY)
-    I5 = cv2.imread("CalibrationImage5.jpg")
-    I5Gray = cv2.cvtColor(I5,cv2.COLOR_RGB2GRAY)
+    # I3 = cv2.imread("CalibrationImage3.jpg")
+    # I3Gray = cv2.cvtColor(I3,cv2.COLOR_RGB2GRAY)
+    # I4 = cv2.imread("CalibrationImage4.jpg")
+    # I4Gray = cv2.cvtColor(I4,cv2.COLOR_RGB2GRAY)
+    # I5 = cv2.imread("CalibrationImage5.jpg")
+    # I5Gray = cv2.cvtColor(I5,cv2.COLOR_RGB2GRAY)
 
-    I1Corners = getCornerCoords(I5Gray)
-    I2Corners = getCornerCoords(I1Gray)
+    I1Corners = getCornerCoords(I1Gray)
+    I2Corners = getCornerCoords(I2Gray)
 
     H = estimateHomography(I1Corners, I2Corners)
 
     K, dist_coefs = calibrate.loadMatrixes()
 
-    box = cube_points((0,-0.2,0),0.2)
+    box = cube_points((0,0,0),0.3)
 
     # project bottom square in first image
 
@@ -76,39 +76,33 @@ def AugmentImages():
 
     box_cam1 = cam1.project(toHomogenious(box))
 
-    # 2D projection of bottom square
-    # figure()
-    # imshow(I1)
-    # plot(box_cam1[0,:],box_cam1[1,:],linewidth=3)
-    # show()
+    #  projection of first box
+    figure()
+    imshow(I1)
+    plot(box_cam1[0,:],box_cam1[1,:],linewidth=3)
+    show()
 
-    # use H to transfer points to the second image
-    box_trans = cv2.normalize(dot(H,box_cam1))
-    
+    # Vi laver en homography mellem de to "flader" (skakbraeder) og ud fra den estimerer vi en projektion.
+    # homografien er kun i 2d, hvor en projektion er i 3d.
+    # Ud fra homografien estimerer vi en projektion (der har en ekstra kulonne til z-aksen).
+    # Vi isolerer
     # compute second camera matrix from cam1 and H the homography is just multiplied on the matrix
     cam2 = Camera(dot(H,cam1.P))
 
-    A = dot(linalg.inv(K),cam2.P[:,:3])
+
+    A = dot(linalg.inv(K),cam2.P[:,:3]) #isolates the [Rotation | translation] matrix to change it
 
     A = array([A[:,0],A[:,1],np.cross(A[:,0],A[:,1],axis=0)]).T
     
     cam2.P[:,:3] = np.dot(K,A[0])
 
     # project with the second camera
-    box_cam2 = np.array(cam2.project(toHomogenious(box_trans)))
-    print box_cam1
-    print shape(box_cam1)
-    print shape(box_cam1[0,:])
-    print type(box_cam1)
+    box_cam2 = np.array(cam2.project(toHomogenious(box)))
 
-    print box_cam2
-    print shape(box_cam2)
-    print shape(box_cam2[0,:])
-    print type(box_cam2)
+
+
     figure()
     imshow(I2)
-    
-    # Only box_cam1 is being plotted in the image
     plot(box_cam2[0,:],box_cam2[1,:],linewidth=3)
     show()
 
@@ -116,10 +110,3 @@ AugmentImages()
 
 
 
-# compute second camera matrix from cam1 and H
-# cam2 = Camera(np.dot(H,cam1.P))
-# A = np.dot(np.linalg.inv(K),cam2.P[:,:3])
-# A = np.array([A[:,0],A[:,1],np.cross(A[:,0],A[:,1])]).T
-# cam2.P[:,:3] = np.dot(K,A)
-# project with the second camera
-# box_cam2 = cam2.project(toHomogenious(box))
