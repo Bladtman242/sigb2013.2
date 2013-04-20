@@ -1,9 +1,12 @@
-\section{Homographies}
-outline:%may delegate to files
-\begin{itemize}
-	\item basics (matrix, rotation, translation, skew, non commutative(?) )
-	\item representation (homogeneity)
-	\item properties (transforms between planes, associative (applied as
-	functions)
-	\item finding homographies (if time+page-space, this can get looong)
-\end{itemize}
+%\item properties (transforms between planes, associative (applied as functions)
+\subsection{Properties}
+Representing operations on points as matrix multiplications makes it possible
+to use the matrices as functions. It is worth mentioning that while matrix
+multiplication is associative, it not commutative. Naturally, the same goes for
+homographies. I.e. for some homograhies $H$, $H1_{1}$ and some point $p$ $$H*p
+\ne p*H$$ and $$H*(H_{1}*p) = (H*H_{1})*p$$ The feature of associativity can,
+computationally speaking, be a time saver. Often it is useful to apply several
+homographies e.g. one for rotation and one for translation. Rather than
+applying both homographies to all relevant points p $$p' = H_{r} * (H_{t} * p)$$ one
+can, equivalently, pre compute a new homography $H=H_{r}*H_{t}$ and use it as
+$$p' = H * p$$ for all points p

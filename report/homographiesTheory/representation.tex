@@ -2,13 +2,11 @@
 \subsection{Representation}
 The operations described in the previous section can be neatly packaged into
 matrix form:
-$$
-\begin{bmatrix}
+$$\begin{bmatrix}
 	r,sc & r,sh & t_{x} \\
 	r,sh & r,sc & t_{y} \\
 	h_{31} & h_{32} & hom
-\end{bmatrix}
-$$
+\end{bmatrix}$$
 
 Where $r,sc$ are combined rotation and scaling parameters, $r,sh$ are combined
 rotation and shearing parameters, $t_{x}$ and $t_{y}$ are translation
@@ -17,9 +15,26 @@ homogeneity.
 
 Homogeneous coordinates in an $n$-dimensional space is represented as a vector
 in $n+1$-dimensional space. So a two-dimensional, Cartesian point in Euclidean
-geometry, $(x,y)$, is represented as the three-dimensional, homogeneous point
-$(zx,zy,z)$ in projective geometry.  The homogeneous representation allows
-multiplication with a (non-zero) scalar, without changing the position of the
-coordinate. Perhaps more notably in this context, it allows $n$-dimensional
-points to be multiplied with $(n+1)\times (n+1)$ matrices.
+geometry
+$$\begin{pmatrix}
+	x \\
+	y
+\end{pmatrix}$$
+is represented as the three-dimensional, homogeneous point
+$$\begin{pmatrix}
+	x' \\
+	y' \\
+	z
+\end{pmatrix}$$
+in projective geometry, such that $$x'=x*z,$$$$y'=y*z$$To convert homogeneous
+coordinates to Cartesian ones,simply take
+$$\begin{pmatrix}
+	\frac{x}{z} \\[0.3em]
+	\frac{y}{z} \\[0.3em]
+	z
+\end{pmatrix}$$
+The homogeneous representation allows multiplication with a (non-zero) scalar,
+without changing the position of the coordinate. Perhaps more notably in this
+context, it allows $n$-dimensional points to be multiplied with $(n+1)\times
+(n+1)$ matrices.
 
