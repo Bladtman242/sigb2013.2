@@ -9,7 +9,7 @@ More generally:
 Given a position in a planar projection of a space, find and display the
 corresponding position in another planar projection of the same space.
 
-\begin{figure}[ht]
+\begin{figure}[!htbp]
 \includegraphics{./pics/Ground.jpg}
 \includegraphics{./pics/ITUMap.png}
 \caption{Top: Ground-view. Bottom: Top-view map}
@@ -30,13 +30,19 @@ For each frame in the video sequence, the point $x$ in $G$ is premultiplied
 with $H_{G}^{M}$. The normalized result is the point $x'$ in $M$, that
 corresponds to the mans location. $$normalize(H_{G}^{M}*x) = x'$$ The point
 representing the mans location in $G$ is chosen as close to his feet as possible.
+\begin{figure}[!htbp]
+\includegraphics{./pics/trackFloor.png}
+\includegraphics{./pics/trackStairs.png}
+\caption{Top: Using $H_{G}^{M}$ to map floor to floor. Bottom: Using the same homography to map stairs to stairs}
+\label{fig:floorvsstairs}
+\end{figure}
 This is important because the man is \emph{not} in plane $G$, he is
 perpendicular to it. Which means $H_{G}^{M}$ could transform his head's
-location to a point several meters from his feet's.
-On a related note, when the man walks up the stairs, he is moving onto another
-plane (or rather planes, as each step is its own plane). Therefore, the
-homography used to project the ground floor cannot be used for the stairs.
-Because of the camera positioning in the ground-view sequence however, the
-stair planes and $G$ are so similar you would have to look closely to see the
-error.
+location to a point several meters from his feet's.  On a related note, when
+the man walks up the stairs, he is moving onto another plane (or rather planes,
+as each step is its own plane). Therefore, the homography used to project the
+ground floor cannot be used for the stairs.  Because of the camera positioning
+in the ground-view sequence however, the stair planes and $G$ are so similar
+you would have to look closely to see the error. This point is illustrated in
+figure \ref{fig:floorvsstairs}
 
