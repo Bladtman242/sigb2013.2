@@ -377,9 +377,9 @@ def texturemapObjectSequence():
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
 
-#showFloorTrackingData()
+showFloorTrackingData()
 #simpleTextureMap()
-realisticTexturemap(20)
+#realisticTexturemap(20)
 #texturemapGridSequence()
 #texturemapGroundFloor()
 # vim: ts=4:shiftwidth=4:expandtab
