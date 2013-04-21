@@ -1,0 +1,38 @@
+\subsection{Our Code: (the important lines)}
+
+\begin{verbatim}
+//This line initializes the first camera, with K * [I | O] .
+
+ cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
+
+//We estimate the homography “H” between the two chessboards by detecting 4 corners in each image.
+
+H = estimateHomography(I1Corners, I2Corners)
+
+//The homography is used on the existing (frontal) camera
+
+  cam2 = Camera(dot(H,cam1.P))
+
+//We isolate the [Rotation | translation] matrix by multiplying by inverse of “K” calibration matrix.
+
+ A = dot(linalg.inv(K),cam2.P[:,:3]) 
+
+//The intrinsic parameters are initialized. The X,Y axes are already valid after being multiplied by the homography matrix, and the third column vector is estimated with the cross product.
+
+    A = array([A[:,0],A[:,1],np.cross(A[:,0],A[:,1],axis=0)]).T
+
+// The calibration matrix is added again by multiplication, and the result is stored in the new camera.
+
+    cam2.P[:,:3] = np.dot(K,A[0])
+
+ //The box coordinates are projected onto the plane with the second camera
+
+box_cam2 = np.array(cam2.project(toHomogenious(box)))
+\end{verbatim}
+
+Note: Concerning getting a better homography we found that using the
+original pattern image “pattern.png” instead of our own frontal webcam
+photo produced a better result. It proved hard to capture a frontal image
+without any rotation or translation. At least with using the pattern image we
+avoid rotations, but a translation is still present as the pattern is not
+completely centered. 
