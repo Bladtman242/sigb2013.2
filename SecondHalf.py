@@ -3,6 +3,7 @@ import calibrationExample as calibrate
 import numpy as np
 from SIGBToolsForSecond import *
 import cv2
+import cv
 
 global K, dist_coefs, I1, I1Corners, box, cam1
 
@@ -103,6 +104,12 @@ box = cube_points((0,0,0),0.3)
 cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
 
 def AugmentFrame(img):
+    """
+    Calculates a homography between the pattern image and the a checkboard in the "img".
+    Instantiates a new came class and projects a box onto the surface of the chessboard.
+    :param img:
+    :return:
+    """
     globals()
     I2 = img
     I2Gray = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
@@ -148,17 +155,29 @@ def liveBox():
     globals()
     capture = cv2.VideoCapture(0)
     running = True
+    saveFrames = False
     while running:
         running, img =capture.read()
-        imgGray=cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ch = cv2.waitKey(1)
         if(ch==27) or (ch==ord('q')): #ESC
             running = False
         img=cv2.undistort(img, K, dist_coefs )
-        found,corners=cv2.findChessboardCorners(imgGray, (9,6)  )
-        if (found!=0):
-            AugmentFrame(img)
+        AugmentFrame(img)
         cv2.imshow("Calibrated",img)
+
+        #save video
+        if (ch==ord('s')):
+            if((saveFrames)):
+                videoWriter.release()
+                saveFrames=False
+                print "End recording"
+            else:
+                imSize = np.shape(img)
+                videoWriter = cv2.VideoWriter("aug.avi", cv.CV_FOURCC('D','I','V','3'), 15.0,(imSize[1],imSize[0]),True) #Make a video writer
+                saveFrames = True
+                print "Recording..."
+        if(saveFrames):
+                videoWriter.write(img)
 
 # Uncomment these if you wish to see a single augmentation.
 
