@@ -56,6 +56,8 @@ def getCornerCoords(boardImg):
         return [(x4,y4),(x3,y3),(x1,y1),(x2,y2)]
 
 def AugmentImage(img):
+    #The following does not utilize the global variables and was made before
+    #the optimisation for live augmentation.
 
     I1 = cv2.imread("pattern.png")
     I2 = img
@@ -74,8 +76,6 @@ def AugmentImage(img):
     #This is K * [I | O]
     cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
 
-    box_cam1 = cam1.project(toHomogenious(box))
-
     # compute second camera matrix from cam1.
     cam2 = Camera(dot(H,cam1.P))
 
@@ -90,13 +90,14 @@ def AugmentImage(img):
     # project with the second camera
     box_cam2 = np.array(cam2.project(toHomogenious(box)))
 
-
-
-    cv2.imshow()
+    figure()
     imshow(I2)
     plot(box_cam2[0,:],box_cam2[1,:],linewidth=3)
     show()
 
+
+
+#These global variables are for the live augmentation.
 I1Corners = getCornerCoords(I1Gray)
 box = cube_points((0,0,0),0.3)
 cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
@@ -105,18 +106,10 @@ def AugmentFrame(img):
     globals()
     I2 = img
     I2Gray = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
-
-
     I2Corners = getCornerCoords(I2Gray)
     if(I2Corners == None):
         return
     H = estimateHomography(I1Corners, I2Corners)
-
-
-
-
-    #This is K * [I | O]
-
 
     # compute second camera matrix from cam1.
     cam2 = Camera(dot(H,cam1.P))
@@ -150,20 +143,6 @@ def AugmentFrame(img):
     cv2.line(I2,(int(box_cam2[0][7]),int(box_cam2[1][7])),(int(box_cam2[0][8]),int(box_cam2[1][8])),(255,255,0))
     cv2.line(I2,(int(box_cam2[0][8]),int(box_cam2[1][8])),(int(box_cam2[0][5]),int(box_cam2[1][5])),(255,255,0))
 
-    # return I2
-
-
-
-# I2 = cv2.imread("CalibrationImage2.jpg")
-# I3 = cv2.imread("CalibrationImage3.jpg")
-# I4 = cv2.imread("CalibrationImage4.jpg")
-# I5 = cv2.imread("CalibrationImage5.jpg")
-# I6 = cv2.imread("CalibrationImage6.jpg")
-
-# AugmentFrame(I2)
-# AugmentImage(I3)
-# AugmentImage(I4)
-# AugmentImage(I6)
 
 def liveBox():
     globals()
@@ -181,6 +160,17 @@ def liveBox():
             AugmentFrame(img)
         cv2.imshow("Calibrated",img)
 
+# Uncomment these if you wish to see a single augmentation.
 
+# I2 = cv2.imread("CalibrationImage2.jpg")
+# I3 = cv2.imread("CalibrationImage3.jpg")
+# I4 = cv2.imread("CalibrationImage4.jpg")
+# I5 = cv2.imread("CalibrationImage5.jpg")
+# I6 = cv2.imread("CalibrationImage6.jpg")
+
+# AugmentImage(I2)
+# AugmentImage(I3)
+# AugmentImage(I4)
+# AugmentImage(I6)
 
 liveBox()
