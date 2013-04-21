@@ -1,11 +1,100 @@
 \subsection{Basics}
-%\item basics (matrix, rotation, translation, skew, non commutative(?) )
-A homography is a projective transformation from one space to another.  Here we
-discuss only transformations in two dimensional spaces, i.e. planes.
-\newline \emph{more to come}
-%$
-%\begin{bmatrix}
-%	1 & 2 & 3 \\
-%	4 & 5 & 6
-%\end{bmatrix}
-%$
+A homography is a projective transformation from one space to another. It can
+be applied to a point to project that point onto another space. Consequently,
+it can be applied to an entire space, to project it onto another. 
+
+Here we discuss only transformations in two-dimensional spaces, i.e. planes.
+We denote the homography from a plane $I$ to a plane $J$ as $H_{I}^{J}$ and
+inversely, the homography from $J$ to $I$ is written as $H_{J}^{I}$.
+
+The operations performed by a homography can be described as any combination of
+\begin{itemize}
+	\item Translation
+	\item Rotation
+	\item Scaling
+	\item Reflecting
+	\item shearing/skewing
+\end{itemize}
+
+Translation is the simple operation of moving a point to another, by adding
+scalars to the points coordinates. Essentially a point
+$\big(\begin{smallmatrix}
+	x \\
+	y
+\end{smallmatrix}\big)$
+can be translated by 
+$\big(\begin{smallmatrix}
+	\Delta x \\
+	\Delta y
+\end{smallmatrix}\big)$
+, making the new point
+$$\begin{pmatrix}
+	x' \\
+	y'
+\end{pmatrix}
+=
+\begin{pmatrix}
+	\Delta x+x \\
+	\Delta y+y
+\end{pmatrix}$$
+
+Rotation is the rotation of a point $(x,y)$ by an angle $\theta$, or rather the
+rotation of a vector from the origin to a point, by an angle.
+$$\begin{bmatrix}
+	x' \\
+	y'
+\end{bmatrix}
+=
+\begin{bmatrix}
+	\cos \theta & -\sin \theta \\
+	\sin \theta & \cos \theta
+\end{bmatrix}
+*
+\begin{bmatrix}
+	x \\
+	y
+\end{bmatrix}$$
+The matrix
+$\big[\begin{smallmatrix}
+	\cos \theta & -\sin \theta \\
+	\sin \theta & \cos \theta
+\end{smallmatrix}\big]$
+is called the \emph{rotation matrix}.
+
+Scaling refers to the multiplication of scalars and a point.
+$$\begin{bmatrix}
+	x' \\
+	y'
+\end{bmatrix}
+=
+\begin{bmatrix}
+	S_{x} & 1 \\
+	1 & S_{y}
+\end{bmatrix}
+*
+\begin{bmatrix}
+	x \\
+	y
+\end{bmatrix}$$
+When $S_{x} = S_{y}$ the aspect ratio will remain the same as before the
+transformation.
+
+Reflecting is the special case when either or both scaling parameter are
+negative, hence reflecting points around the coordinate systems axes.
+
+Shearing or skewing is a transformation that wont respect angles, and is
+obtained by
+$$\begin{bmatrix}
+	x' \\
+	y'
+\end{bmatrix}
+=
+\begin{bmatrix}
+	1 & Sh_{x} \\
+	Sh_{y} & 1
+\end{bmatrix}
+*
+\begin{bmatrix}
+	x \\
+	y
+\end{bmatrix}$$

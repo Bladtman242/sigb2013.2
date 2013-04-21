@@ -9,4 +9,14 @@ computationally speaking, be a time saver. Often it is useful to apply several
 homographies e.g. one for rotation and one for translation. Rather than
 applying both homographies to all relevant points p $$p' = H_{r} * (H_{t} * p)$$ one
 can, equivalently, pre compute a new homography $H=H_{r}*H_{t}$ and use it as
-$$p' = H * p$$ for all points p
+$$p' = H * p$$ for all points p.
+
+It also means that for projections between 3 planes, $G, M, T$, and
+homographies $H_{G}^{M}$ from $G$ to $M$, $H_{M}^{T}$ from $M$ to $T$, the
+following holds true: $$H_{G}^{T} = H_{G}^{M} * H_{M}^{T}$$.
+
+Another important property of homographies is invertibility. Any tranformation
+from one plane to another can be inversed. Homography invertibility translates
+directly to matrix invertibility, so that $H_{T}^{G} = (H_{G}^{T})^{-1}$
+Thus we can expand the previous example with
+$$H_{T}^{G} = (H_{G}^{M} * H_{M}^{T})^{-1}$$
