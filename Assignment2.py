@@ -160,6 +160,8 @@ def texturemapGridSequence():
             cv2.waitKey(1)
 
 def realisticTexturemap(scale=1,point=(200,200)):
+    #Load in a homography Hg->m, found by selecting 4 corresponding points,
+    #and saved from the floor-mapping method
     homo = np.load("Homography.good.npy")
     
     #A simple attenmpt to get mouse inputs and display images using matplotlib
@@ -186,29 +188,38 @@ def realisticTexturemap(scale=1,point=(200,200)):
     n,m,o = shape(mp)
     n1,m1,o1 = shape(T) 
     
-    # Make homogenious coordinate from seleced point
+    # Make homogeneous coordinate from selected point (Still in G)
     point = np.matrix([point[0][0],point[0][1],1]).T
     
-    #Map the new point based on previously calculated homography
+    #Find the new point based on previously calculated homography
+    #(the one saved to a file)
     pointPrime = homo * point
-    pointPrime = normalize(pointPrime)
+    pointPrime = normalize(pointPrime) # now a point in M (which is the same plane as T)
    
-    # We need 4 four points in the destination image to put the texture
-    # This points need to retain the same aspect ratio as the original
-    aspect = m1 /n1
+    # We need 4 four points in the destination image. (actually the map)
+    # We "make up" these points, by choosing 4 corners of a (made up) rectangle
+    # The points lie close to each other, to reduce risk of making a bad
+    # homography. 
+
+    aspect = m1 /n1 #aspect ration of texture /logo
     
-    delta = 3
+    delta = 3 #side length of made up rectangle
     x = pointPrime[0][0]
     y = pointPrime[1][0]
     
-    # New points calculated from aspect ratio and projected points
+    # New points calculated from aspect ratio and projected point
+    # (These are the made up points) (origin is top-left, x axis is vertical)
+    # (x,y)           |    (x,y+(delta*aspect)
+    #-------------------------------------------------
+    # (x+delta, y)    |    (x+delta, y+(delta*aspect)
+
     newPoints = [
                 [x,y],   
                 [x,y+(delta*aspect)],   
                 [x+delta,y+(delta*aspect)],   
                 [x+delta,y]   
             ]
-    # Texture points are the just the corners
+    # Texture points are the just the corners of the texture
     TPoints = [
                 [0,0],
                 [0,n1],
@@ -216,7 +227,7 @@ def realisticTexturemap(scale=1,point=(200,200)):
                 [m1,0]
             ]
 
-    # The center of the projected texture
+    # The center of the texture
     TCenterX = TPoints[0][0] + TPoints[3][0] / 2
     TCenterY = TPoints[0][1] + TPoints[1][1] / 2
     TCenter = (TCenterX,TCenterY)
@@ -226,41 +237,56 @@ def realisticTexturemap(scale=1,point=(200,200)):
     H_MT = SIGBTools.estimateHomography(newPoints, TPoints)
      
     # The homography going from Groundfloor to Texture
+    #Hg->m * Hm->t is Hg->t. we take the inverse of that, Ht->g
     H_TG = homo.dot(H_MT).I
     
-    # Point in the source image
+    # phtg becomes the T's origin, projected to G
     phtg = normalize(H_TG.dot(np.matrix([0,0,1]).T))
+    #sigurtVector (really?) is the translation vector from
+    # the projected texture origin, to where the user clicked in G
     sigurtVector = point - phtg
 
-    # Translation matrix
+    # Translation matrix a matrix that will apply sigurtVector as translation.
+    # i.e. will translate the projected T, so that T's top-left corner is at the
+    # clicked point
     sigurtMat = np.matrix([
             [1.,0.,sigurtVector[0][0]],
             [0.,1.,sigurtVector[1][0]],
             [0.,0.,1.]
             ]);
-    
-    # The center point in the destination image
+
+    # normalize (sigurtMat * (Ht->g * centerOfTInT)) is the center of T, projected and
+    # moved so that T's origin would be at the clicked point in G
+    # It is therefore also the vector from G's origin to the center of T in G
     GCenter = normalize(sigurtMat * H_TG * np.matrix([TCenter[0],TCenter[1],1]).T)
-    
 
+    # The vector from T's center (in G) to G's origin
     vectorToOrigin = [GCenter[0][0]*-1,GCenter[1][0]*-1]
-    
 
+    #The matrix that will move the projected texture's center to G's origin
     sigurtFlyt = np.matrix([
             [1,0,vectorToOrigin[0]],
             [0,1,vectorToOrigin[1]],
             [0,0,1]
         ]);
-    
+
+    #scaling matrix, as specified by method parameter
     sigurtScale = np.matrix([
             [scale,0,0],
             [0,scale,0],
             [0,0,1]
         ]);
-    
+
+    # (sigurtScale * sigurtFlyt) : make a matrix that moves T in G to G's origin
+    # sigurtFlyt.I * (sigurtScale * sigurtFlyt) : this matrix will moove the
+    # texture back again.
     scaleMat = sigurtFlyt.I * (sigurtScale * sigurtFlyt)
 
     cv2.circle(mp,(GCenter[0],GCenter[1]),10,(255,0,0))
+    #(sigurtMat.dot(H_TG)) will project T to G, so that the corner of T is at
+    #the clicked point
+    #scaleMat.dot(sigurtMat.dot(H_TG) will do that, and move T to G's origin,
+    #scale it and move it back
     warp = cv2.warpPerspective(T, scaleMat.dot(sigurtMat.dot(H_TG)), (m,n))
 
     mp = cv2.addWeighted(mp, 0.9, warp, 0.9, 0)
