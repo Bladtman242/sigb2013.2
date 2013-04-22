@@ -42,7 +42,7 @@ def simpleTextureMap():
     M = cv2.addWeighted(I2, 0.5, overlay, 0.5,0)
 
     cv2.imshow("Overlayed Image",M)
-    cv2.waitKey(1)
+    cv2.waitKey(0)
 
 def showImageandPlot(N):
     #A simple attenmpt to get mouse inputs and display images using matplotlib
@@ -179,61 +179,73 @@ def realisticTexturemap(scale=1,point=(200,200)):
     ax2.imshow(T)
     ax1.axis('image') 
     ax1.axis('off') 
+    # User selects a point
     point = fig.ginput(1)
     fig.hold('on')
     
     n,m,o = shape(mp)
     n1,m1,o1 = shape(T) 
-
-    point = np.matrix([point[0][0],point[0][1],1]).T
-
-    pointPrime = homo * point
-
-    aspect = m1 /n1
     
+    # Make homogenious coordinate from seleced point
+    point = np.matrix([point[0][0],point[0][1],1]).T
+    
+    #Map the new point based on previously calculated homography
+    pointPrime = homo * point
     pointPrime = normalize(pointPrime)
+   
+    # We need 4 four points in the destination image to put the texture
+    # This points need to retain the same aspect ratio as the original
+    aspect = m1 /n1
     
     delta = 3
     x = pointPrime[0][0]
     y = pointPrime[1][0]
     
+    # New points calculated from aspect ratio and projected points
     newPoints = [
                 [x,y],   
                 [x,y+(delta*aspect)],   
                 [x+delta,y+(delta*aspect)],   
                 [x+delta,y]   
             ]
-
+    # Texture points are the just the corners
     TPoints = [
                 [0,0],
                 [0,n1],
                 [m1,n1],
                 [m1,0]
             ]
-   
+
+    # The center of the projected texture
     TCenterX = TPoints[0][0] + TPoints[3][0] / 2
     TCenterY = TPoints[0][1] + TPoints[1][1] / 2
-
     TCenter = (TCenterX,TCenterY)
-
+   
+    # A new homography is estimated based on the new points and the
+    # texture points. This will go from Texture to Map
     H_MT = SIGBTools.estimateHomography(newPoints, TPoints)
-    
+     
+    # The homography going from Groundfloor to Texture
     H_TG = homo.dot(H_MT).I
     
+    # Point in the source image
     phtg = normalize(H_TG.dot(np.matrix([0,0,1]).T))
-    
     sigurtVector = point - phtg
 
+    # Translation matrix
     sigurtMat = np.matrix([
             [1.,0.,sigurtVector[0][0]],
             [0.,1.,sigurtVector[1][0]],
             [0.,0.,1.]
             ]);
- 
+    
+    # The center point in the destination image
     GCenter = normalize(sigurtMat * H_TG * np.matrix([TCenter[0],TCenter[1],1]).T)
     
+
     vectorToOrigin = [GCenter[0][0]*-1,GCenter[1][0]*-1]
     
+
     sigurtFlyt = np.matrix([
             [1,0,vectorToOrigin[0]],
             [0,1,vectorToOrigin[1]],
@@ -247,8 +259,6 @@ def realisticTexturemap(scale=1,point=(200,200)):
         ]);
     
     scaleMat = sigurtFlyt.I * (sigurtScale * sigurtFlyt)
-    
-
 
     cv2.circle(mp,(GCenter[0],GCenter[1]),10,(255,0,0))
     warp = cv2.warpPerspective(T, scaleMat.dot(sigurtMat.dot(H_TG)), (m,n))
@@ -377,9 +387,9 @@ def texturemapObjectSequence():
             cv2.imshow("Detection",imgOrig)
             cv2.waitKey(1)
 
-showFloorTrackingData()
+#showFloorTrackingData()
 #simpleTextureMap()
-#realisticTexturemap(20)
+realisticTexturemap(20)
 #texturemapGridSequence()
 #texturemapGroundFloor()
-# vim: ts=4:shiftwidth=4:expandtab
+# vim: ts=4:shiftwidth=4:expandtab:tw=80

@@ -43,6 +43,10 @@ nosetests.xml
 *.out
 *.aux
 *.swp
+*.dvi
 .idea/
 :/
 data/
+target/
+
+*.fdb_latexmk
