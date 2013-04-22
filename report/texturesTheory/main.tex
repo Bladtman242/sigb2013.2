@@ -1,17 +1,21 @@
-\section{Texture Mapping} 
+\section{Mapping Transformations}
 
-\subsection{Obtaining homographies}
+A forward mapping is a transformation applied to a matrix resulting in a
+spatial correspondences between all points in the matrix to a warped
+matrix with the same dimensions. Spatial here means that each point in the
+original matrix is affected and has a "warped" counterpart in the other
+matrix. This transformation can be expressed in two "directions" Input going
+to output, and output going to input. 
+To make notation easier we will use the notation $(x,y)$ to denote a
+coordinates in the output image and $(u,v)$ to denote coordinates in the input
+image. We will further define the mapping function X,Y,U and V which will map a
+value to it's lowercase value. 
 
-\subsection{Perspective Transformation}
+With these definitions we can describe the two kinds of mappings (forward and
+inverse) as:
 
-\subsection{Forward mapping}
+$$[x, y] = [X (u,v),Y(u, v)]$$
 
-\subsection{Inverse mapping}
+and
 
-outline
-\begin{itemize}
-        \item the transform (should be covered under homographies, so just
-	mention it)
-	\item different interpolations
-	\item (if time + page-space) piecewise mappings, stitching/feature detection
-\end{itemize}
+$$[u,v] = [U(x, y),V (x, y)]$$
