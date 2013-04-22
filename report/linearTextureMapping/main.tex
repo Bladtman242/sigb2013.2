@@ -53,5 +53,19 @@ preservation of the textures original dimensions
 This problem will be solved through the use of forward mapping and two
 homographies.
 
-The steps are as follows
+To do it we use 3 parameters.
 
+First we "cheat" beforehand by using a previously obtained homography. This
+Homography is saved when we map the ground view to the map, as described in
+a previous section, and goes between the map and ground floor images. This homography determines our mapping, and as such
+dictates the quality of the result, and is one our inputs.
+The second is a user selected point, determining where the center of the
+texture will be placed. Lastly, we modify the texture with scaling
+parameter.
+
+Using the obtained homography we can determine where the texture will be
+placed in the destination image. We need a center of the texture
+destination, and the aspect ratio of the texture. Using this we can
+determine the position of the 4 points of the texture. 
+
+To get the 

@@ -1,0 +1,53 @@
+\subsection{Taking it live}
+
+As soon as the method for augmenting a box on a single frame is in place,
+expanding to live view is a pretty easy task. 
+In the old augmentation method we did a fair share of redundant
+calculations. In order for the live augmentation to run smoothly, these had
+to be moved out so they’ll only be done once.
+
+Reading in the pattern image, converting it to greyscale and loading the
+calibration-matrixes were moved out to global vars instead.
+
+\begin{verbatim}
+I1 = cv2.imread("pattern.png")
+I1Gray = cv2.cvtColor(I1,cv2.COLOR_RGB2GRAY)
+K, dist_coefs = calibrate.loadMatrixes()
+\end{verbatim}
+
+Calculating the corderns of the original pattern image, getting the box cords
+and initialising the first camera instance also only needed to be done once.
+
+\begin{verbatim}
+I1Corners = getCornerCoords(I1Gray)
+box = cube_points((0,0,0),0.3)
+cam1 = Camera(hstack((K,dot(K,array([[0],[0],[-1]])) )) )
+\end{verbatim}
+
+Notice that these are only minor speed improvements, as each frame still has
+some heavy calculations to be made:
+
+\subsubsection{We still have to}
+Find the chessboard corners on the supplied frame
+
+\begin{verbatim}
+I2Corners = getCornerCoords(I2Gray)
+\end{verbatim}
+
+Calculate a homography between the two chessboard 2d surfaces.
+
+\begin{verbatim}
+H = estimateHomography(I1Corners, I2Corners)
+\end{verbatim}
+
+Project the box cords onto the new surface.
+
+\begin{verbatim}
+box_cam2 = np.array(cam2.project(toHomogenious(box)))
+\end{verbatim}
+
+And then draw the box in the frame.
+The end result could of course be improve further (as always), but for the scope
+of this assignment we think the result is very acceptable, and undeniably cool
+:-)
+See. Aug.avi for the result video.
